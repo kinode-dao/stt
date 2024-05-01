@@ -1,0 +1,14 @@
+[
+    {
+        "process_name": "speech_to_text",
+        "process_wasm_path": "/speech_to_text.wasm",
+        "on_exit": "Restart",
+        "request_networking": true,
+        "request_capabilities": [
+            "http_server:distro:sys",
+            "http_client:distro:sys"
+        ],
+        "grant_capabilities": [],
+        "public": true
+    }
+]

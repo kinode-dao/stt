@@ -1,0 +1,10 @@
+[workspace]
+resolver = "2"
+members = [
+    "speech_to_text", "stt_interface",
+]
+
+[profile.release]
+panic = "abort"
+opt-level = "s"
+lto = true

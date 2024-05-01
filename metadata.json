@@ -1,0 +1,16 @@
+{
+    "name": "speech_to_text",
+    "description": "",
+    "image": "",
+    "properties": {
+        "package_name": "speech_to_text",
+        "current_version": "0.1.0",
+        "publisher": "template.os",
+        "mirrors": [],
+        "code_hashes": {
+            "0.1.0": ""
+        }
+    },
+    "external_url": "",
+    "animation_url": ""
+}
