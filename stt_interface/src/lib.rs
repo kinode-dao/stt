@@ -1,7 +1,8 @@
 // TODO: This should get replaced by a wit file in the future. We are only going to define request and response structs here. 
 use serde::{Deserialize, Serialize};
+use derive_builder::Builder;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Builder)]
 pub struct STTRequest {
     pub variant: STTVariant,
     pub key: String,
