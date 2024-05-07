@@ -4,48 +4,19 @@ use kinode_process_lib::{
     Address, Request, Response,
 };
 use std::{collections::HashMap, vec};
-use stt_interface::{STTRequest, STTResponse, STTVariant};
+use stt_interface::{STTRequest, STTResponse};
 
 pub const BASE_URL: &str = "https://api.openai.com/v1/audio/transcriptions";
 
 mod structs;
-use structs::WhisperResponse;
+use structs::*;
 
 wit_bindgen::generate!({
     path: "wit",
     world: "process",
 });
 
-call_init!(init);
-fn init(_our: Address) {
-    loop {
-        handle_message();
-    }
-}
 
-fn handle_message() -> Option<()> {
-    let msg = await_message().ok()?;
-    let body = msg.body();
-
-    if msg.is_request() {
-        let Ok(stt_request) = serde_json::from_slice::<STTRequest>(&body) else {
-            println!("Failed to parse STTRequest from message body");
-            return None;
-        };
-        let key = stt_request.key;
-        match stt_request.variant {
-            STTVariant::OpenaiTranscribe(audio_data) => {
-                openai_whisper_request(&audio_data, &key);
-            }
-        }
-    } else {
-        let response = openai_whisper_response();
-        let body = serde_json::to_vec(&response).ok()?;
-        let _ = Response::new().body(body).send();
-    }
-
-    Some(())
-}
 
 pub fn openai_whisper_request(audio_bytes: &[u8], openai_key: &str) {
     let boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW";
@@ -100,5 +71,67 @@ pub fn openai_whisper_response() -> STTResponse {
     match serde_json::from_slice::<WhisperResponse>(bytes.as_slice()) {
         Ok(response) => STTResponse::OpenaiTranscribed(response.text),
         Err(e) => STTResponse::Error(e.to_string()),
+    }
+}
+
+fn register_openai_api_key(
+    api_key: &str,
+    state: &mut Option<State>,
+) -> anyhow::Result<()> {
+    match state {
+        Some(_state) => {
+            _state.openai_api_key = api_key.to_string();
+            _state.save();
+        }
+        None => {
+            let _state = State {
+                openai_api_key: api_key.to_string(),
+            };
+            _state.save();
+            *state = Some(_state);
+        }
+    }
+    let _ = Response::new().body(serde_json::to_vec(&STTResponse::Ok)?).send();
+    Ok(())
+}
+
+fn handle_message(state: &mut Option<State>) -> Option<()> {
+    let msg = await_message().ok()?;
+    let body = msg.body();
+
+    if msg.is_request() {
+        let Ok(stt_request) = serde_json::from_slice::<STTRequest>(&body) else {
+            println!("Failed to parse STTRequest from message body");
+            return None;
+        };
+        match stt_request {
+            STTRequest::RegisterApiKey(key) => {
+                let _ = register_openai_api_key(&key, state);
+            },
+            STTRequest::OpenaiTranscribe(audio_data) => {
+                match state {
+                    Some(state) => {
+                        openai_whisper_request(&audio_data, &state.openai_api_key);
+                    }
+                    None => {
+                        println!("No API key registered");
+                    }
+                }
+            },
+        }
+    } else {
+        let response = openai_whisper_response();
+        let body = serde_json::to_vec(&response).ok()?;
+        let _ = Response::new().body(body).send();
+    }
+
+    Some(())
+}
+
+call_init!(init);
+fn init(_our: Address) {
+    let mut state = State::fetch();
+    loop {
+        handle_message(&mut state);
     }
 }
