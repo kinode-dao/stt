@@ -1,4 +1,3 @@
-// TODO: This should get replaced by a wit file in the future. We are only going to define request and response structs here. 
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
