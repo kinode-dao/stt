@@ -1531,6 +1531,7 @@ checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
 [[package]]
 name = "stt_interface"
 version = "0.1.0"
+source = "git+https://github.com/kinode-dao/stt?branch=interface#43776db80d97b61af5c109939ddb7ded90262b2d"
 dependencies = [
  "derive_builder",
  "serde",
