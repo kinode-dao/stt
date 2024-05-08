@@ -1,11 +1,11 @@
 {
-    "name": "speech_to_text",
-    "description": "",
+    "name": "Speech to Text",
+    "description": "Speech to Text Service for Kinode",
     "image": "",
     "properties": {
-        "package_name": "speech_to_text",
+        "package_name": "stt",
         "current_version": "0.1.0",
-        "publisher": "template.os",
+        "publisher": "appattacc.os",
         "mirrors": [],
         "code_hashes": {
             "0.1.0": ""
