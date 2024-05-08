@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-    "speech_to_text", "stt_interface",
+    "stt_interface",
 ]
 
 [profile.release]
