@@ -16,8 +16,6 @@ wit_bindgen::generate!({
     world: "process",
 });
 
-
-
 pub fn openai_whisper_request(audio_bytes: &[u8], openai_key: &str) {
     let boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW";
     let content_type = format!("multipart/form-data; boundary={}", boundary);
@@ -44,9 +42,6 @@ pub fn openai_whisper_request(audio_bytes: &[u8], openai_key: &str) {
     body.extend_from_slice(b"whisper-1\r\n");
 
     body.extend_from_slice(format!("--{}--\r\n", boundary).as_bytes());
-
-    // http::send_request(http::Method::POST, url, headers, Some(30), body);
-    // TODO: Zena: Could we make a http:send_request_with_context in process lib?
 
     let _ = Request::to(("our", "http_client", "distro", "sys"))
         .body(
@@ -135,3 +130,5 @@ fn init(_our: Address) {
         handle_message(&mut state);
     }
 }
+
+// TODO: Zena: Proper multiform crate that avoids this, but that also works in WASM. 
