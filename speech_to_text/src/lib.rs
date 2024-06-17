@@ -123,7 +123,7 @@ fn handle_message(state: &mut Option<State>) -> Option<()> {
     Some(())
 }
 
-// call_init!(init);
+call_init!(init);
 fn init(_our: Address) {
     let mut state = State::fetch();
     loop {
