@@ -12,8 +12,8 @@ mod structs;
 use structs::*;
 
 wit_bindgen::generate!({
-    path: "wit",
-    world: "process",
+    path: "target/wit",
+    world: "process-v0",
 });
 
 pub fn openai_whisper_request(audio_bytes: &[u8], openai_key: &str) {
@@ -123,7 +123,7 @@ fn handle_message(state: &mut Option<State>) -> Option<()> {
     Some(())
 }
 
-call_init!(init);
+// call_init!(init);
 fn init(_our: Address) {
     let mut state = State::fetch();
     loop {
