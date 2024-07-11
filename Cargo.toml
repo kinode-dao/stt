@@ -1,0 +1,11 @@
+[workspace]
+resolver = "2"
+members = [
+    "stt",
+    "stt_api",
+]
+
+[profile.release]
+panic = "abort"
+opt-level = "s"
+lto = true

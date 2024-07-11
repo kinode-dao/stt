@@ -1,0 +1,20 @@
+interface stt {
+    variant stt-request {
+        register-api-key(string),
+        openai-transcribe(list<u8>),
+    }
+
+    variant stt-response {
+        register-api-key(result<string, string>),
+        openai-transcribe(result<string, string>),
+    }
+}
+
+world stt-appattacc-dot-os-api-v0 {
+    export stt;
+}
+
+world stt-appattacc-dot-os-v0 {
+    import stt;
+    include process-v0;
+}
