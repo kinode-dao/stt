@@ -18,6 +18,8 @@ wit_bindgen::generate!({
     additional_derives: [serde::Deserialize, serde::Serialize, process_macros::SerdeJsonInto],
 });
 
+// TODO: Zena: CBA to find a crate that does this in rust-wasm-wasi, will just rewrite this process in js once support is there.
+// This works, it's just ugly. 
 pub fn openai_whisper_request(audio_bytes: &[u8], openai_key: &str) -> anyhow::Result<()> {
     let boundary = "----WebKitFormBoundary7MA4YWxkTrZu0gW";
     let content_type = format!("multipart/form-data; boundary={}", boundary);
@@ -45,8 +47,7 @@ pub fn openai_whisper_request(audio_bytes: &[u8], openai_key: &str) -> anyhow::R
 
     body.extend_from_slice(format!("--{}--\r\n", boundary).as_bytes());
 
-    // TODO: Zena: Use the same structure for sending as the example, and yield result
-    let _a = Request::to(("our", "http_client", "distro", "sys"))
+    Request::to(("our", "http_client", "distro", "sys"))
         .body(
             serde_json::to_vec(&HttpClientAction::Http(OutgoingHttpRequest {
                 method: http::Method::POST.to_string(),
@@ -58,8 +59,7 @@ pub fn openai_whisper_request(audio_bytes: &[u8], openai_key: &str) -> anyhow::R
         )
         .blob_bytes(body)
         .expects_response(30)
-        .send()?;
-    Ok(())
+        .send()
 }
 
 fn register_openai_api_key(api_key: &str, state: &mut Option<State>) -> anyhow::Result<()> {
@@ -118,7 +118,13 @@ pub fn handle_openai_whisper_response() -> anyhow::Result<()> {
     let bytes = blob.bytes;
     let response = match serde_json::from_slice::<WhisperResponse>(bytes.as_slice()) {
         Ok(response) => SttResponse::OpenaiTranscribe(Ok(response.text)),
-        Err(e) => SttResponse::OpenaiTranscribe(Err(e.to_string())),
+        Err(e) => {
+            let error_message = e.to_string();
+            match String::from_utf8(bytes.to_vec()) {
+                Ok(decoded) => SttResponse::OpenaiTranscribe(Err(format!("{}: {}", error_message, decoded))),
+                Err(_) => SttResponse::OpenaiTranscribe(Err(error_message)),
+            }
+        },
     };
 
     let body = serde_json::to_vec(&response)?;
